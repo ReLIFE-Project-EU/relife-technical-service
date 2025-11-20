@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from relife_service_template.models.sei import SEIRequest, SEIResponse
-from relife_service_template.services.sei import calculate_sei
-from relife_service_template.auth.dependencies import get_authenticated_user_without_roles as get_current_user
+from relife_technical.models.sei import SEIRequest, SEIResponse
+from relife_technical.services.sei import calculate_sei
+from relife_technical.auth.dependencies import get_authenticated_user_without_roles as get_current_user
 
 router = APIRouter(
     prefix="/technical",

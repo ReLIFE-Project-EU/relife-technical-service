@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from relife_service_template.models.uc import UCRequest, UCResponse
-from relife_service_template.services.uc import calculate_uc
-from relife_service_template.auth.dependencies import get_authenticated_user_without_roles as get_current_user
+from relife_technical.models.uc import UCRequest, UCResponse
+from relife_technical.services.uc import calculate_uc
+from relife_technical.auth.dependencies import get_authenticated_user_without_roles as get_current_user
 
 router = APIRouter(
     prefix="/technical",

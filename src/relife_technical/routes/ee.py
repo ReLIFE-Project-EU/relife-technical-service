@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from relife_service_template.models.ee import EERequest, EEResponse
-from relife_service_template.services.ee import calculate_ee
-from relife_service_template.auth.dependencies import get_authenticated_user_without_roles as get_current_user
+from relife_technical.models.ee import EERequest, EEResponse
+from relife_technical.services.ee import calculate_ee
+from relife_technical.auth.dependencies import get_authenticated_user_without_roles as get_current_user
 
 router = APIRouter(
     prefix="/technical",

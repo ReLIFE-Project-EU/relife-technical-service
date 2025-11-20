@@ -1,13 +1,13 @@
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
 
-from relife_service_template.auth.dependencies import (
+from relife_technical.auth.dependencies import (
     AuthenticatedUserDep,
     AuthenticatedUserWithRolesDep,
     UserClientDep,
 )
-from relife_service_template.config.logging import get_logger
-from relife_service_template.config.settings import SettingsDep
-from relife_service_template.models.examples import (
+from relife_technical.config.logging import get_logger
+from relife_technical.config.settings import SettingsDep
+from relife_technical.models.examples import (
     FileUploadResponse,
     StorageFileInfo,
     TableDataResponse,

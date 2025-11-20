@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from relife_service_template.models.fv import FVRequest, FVResponse
-from relife_service_template.services.fv import calculate_fv
-from relife_service_template.auth.dependencies import get_authenticated_user_without_roles as get_current_user
+from relife_technical.models.fv import FVRequest, FVResponse
+from relife_technical.services.fv import calculate_fv
+from relife_technical.auth.dependencies import get_authenticated_user_without_roles as get_current_user
 
 router = APIRouter(
     prefix="/technical",

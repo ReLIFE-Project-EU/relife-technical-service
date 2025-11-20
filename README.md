@@ -1,8 +1,8 @@
-# ReLIFE Service API Template
+# ReLIFE Technical Service
 
 ## Introduction
 
-This is a Python template for a ReLIFE Service API that integrates with Supabase for database operations and storage, and with Keycloak for authentication and authorisation. It provides a foundation for building ReLIFE Services including Supabase user authentication, Keycloak role-based access control, and file storage capabilities.
+The ReLIFE Technical Service provides tools for estimating renovation costs, forecasting post-renovation property value, and evaluating long-term energy and economic savings.
 
 ## Technology Stack
 
@@ -33,8 +33,9 @@ All configuration is driven by environment variables:
 | **Storage**  | `BUCKET_NAME`            | Name of the default storage bucket in Supabase    | `default_relife_bucket`                              |
 
 > [!WARNING]
-> * The `SUPABASE_KEY` uses the service role key that bypasses Row Level Security (RLS) policies. This should **never** be exposed to clients.
-> * `KEYCLOAK_CLIENT_SECRET` is sensitive and should be properly secured in production environments.
+>
+> - The `SUPABASE_KEY` uses the service role key that bypasses Row Level Security (RLS) policies. This should **never** be exposed to clients.
+> - `KEYCLOAK_CLIENT_SECRET` is sensitive and should be properly secured in production environments.
 
 ## Authentication Integration Validation
 
