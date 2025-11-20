@@ -2,8 +2,8 @@ from importlib.metadata import version
 
 from fastapi import FastAPI
 
-from relife_service_template.config.logging import configure_logging
-from relife_service_template.routes import auth, examples, health
+from relife_technical.config.logging import configure_logging
+from relife_technical.routes import auth, examples, health, ee, rei, sei, uc, fv
 
 # Dynamically determine the package name
 package_name = __name__.split(".")[0]
@@ -29,8 +29,8 @@ app.include_router(auth.router)
 app.include_router(examples.router)
 
 #Technical service endpoints
-app.include_router(ee_router)
-app.include_router(rei_router)
-app.include_router(sei_router)
-app.include_router(uc_router)
-app.include_router(fv_router)
+app.include_router(ee.router)
+app.include_router(rei.router)
+app.include_router(sei.router)
+app.include_router(uc.router)
+app.include_router(fv.router)

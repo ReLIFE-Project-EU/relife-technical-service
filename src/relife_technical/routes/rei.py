@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from relife_service_template.models.rei import REIRequest, REIResponse
-from relife_service_template.services.rei import calculate_rei
-from relife_service_template.auth.dependencies import get_authenticated_user_without_roles as get_current_user
+from relife_technical.models.rei import REIRequest, REIResponse
+from relife_technical.services.rei import calculate_rei
+from relife_technical.auth.dependencies import get_authenticated_user_without_roles as get_current_user
 
 router = APIRouter(
     prefix="/financial",
@@ -28,7 +28,7 @@ async def rei_endpoint(
             onsite_res_max=request.onsite_res_max,
             net_energy_export_kpi=request.net_energy_export_kpi,
             net_energy_export_min=request.net_energy_export_min,
-            net_energy_export_max=request.net_energy_export_max
+            net_energy_export_max=request.net_energy_export_max,
             profile=request.profile
 
         )
