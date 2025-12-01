@@ -1,7 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
+
+from relife_technical.auth.dependencies import (
+    get_authenticated_user_without_roles as get_current_user,
+)
 from relife_technical.models.ee import EERequest, EEResponse
 from relife_technical.services.ee import calculate_ee
-from relife_technical.auth.dependencies import get_authenticated_user_without_roles as get_current_user
 
 router = APIRouter(
     prefix="/technical",
@@ -9,17 +12,24 @@ router = APIRouter(
     responses={401: {"description": "Unauthorized"}},
 )
 
+
 @router.post("/ee", response_model=EEResponse, summary="Calculate EE weight")
 async def ee_endpoint(
     request: EERequest,
-    #user = Depends(get_current_user),
+    # user = Depends(get_current_user),
 ):
     """
     Calculate the EE of Project.
     """
 
     try:
-       ee_value = calculate_ee(
+        (
+            ee_kpi_weight,
+            envelope_normalized,
+            window_normalized,
+            heating_system_normalized,
+            cooling_system_normalized,
+        ) = calculate_ee(
             envelope_kpi=request.envelope_kpi,
             envelope_min=request.envelope_min,
             envelope_max=request.envelope_max,
@@ -32,10 +42,17 @@ async def ee_endpoint(
             cooling_system_kpi=request.cooling_system_kpi,
             cooling_system_min=request.cooling_system_min,
             cooling_system_max=request.cooling_system_max,
-            profile=request.profile
-
+            profile=request.profile,
         )
-       return EEResponse(ee=ee_value, input=request)
+
+        return EEResponse(
+            ee_kpi_weight=ee_kpi_weight,
+            envelope_normalized=envelope_normalized,
+            window_normalized=window_normalized,
+            heating_system_normalized=heating_system_normalized,
+            cooling_system_normalized=cooling_system_normalized,
+            input=request,
+        )
     except Exception as e:
         # Return a 400 with the error message if something went wrong
         raise HTTPException(status_code=400, detail=str(e))

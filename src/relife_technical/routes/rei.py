@@ -1,7 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
+
+from relife_technical.auth.dependencies import (
+    get_authenticated_user_without_roles as get_current_user,
+)
 from relife_technical.models.rei import REIRequest, REIResponse
 from relife_technical.services.rei import calculate_rei
-from relife_technical.auth.dependencies import get_authenticated_user_without_roles as get_current_user
 
 router = APIRouter(
     prefix="/financial",
@@ -9,17 +12,23 @@ router = APIRouter(
     responses={401: {"description": "Unauthorized"}},
 )
 
+
 @router.post("/rei", response_model=REIResponse, summary="Calculate REI weight")
 async def rei_endpoint(
     request: REIRequest,
-    #user = Depends(get_current_user),
+    # user = Depends(get_current_user),
 ):
     """
     Calculate the REI of Project.
     """
 
     try:
-       rei_value = calculate_rei(
+        (
+            rei_kpi_weight,
+            st_coverage_normalized,
+            onsite_res_normalized,
+            net_energy_normalized,
+        ) = calculate_rei(
             st_coverage_kpi=request.st_coverage_kpi,
             st_coverage_min=request.st_coverage_min,
             st_coverage_max=request.st_coverage_max,
@@ -29,10 +38,16 @@ async def rei_endpoint(
             net_energy_export_kpi=request.net_energy_export_kpi,
             net_energy_export_min=request.net_energy_export_min,
             net_energy_export_max=request.net_energy_export_max,
-            profile=request.profile
-
+            profile=request.profile,
         )
-       return REIResponse(rei=rei_value, input=request)
+
+        return REIResponse(
+            rei_kpi_weight=rei_kpi_weight,
+            st_coverage_normalized=st_coverage_normalized,
+            onsite_res_normalized=onsite_res_normalized,
+            net_energy_normalized=net_energy_normalized,
+            input=request,
+        )
     except Exception as e:
         # Return a 400 with the error message if something went wrong
         raise HTTPException(status_code=400, detail=str(e))
