@@ -83,6 +83,12 @@ class RichStructuredLogger:
         formatted_msg = self._format_message(msg, "debug", **kwargs)
         self._logger.debug(formatted_msg)
 
+    def exception(self, msg: str, **kwargs: Any) -> None:
+        """Log an error message with traceback and optional structured data."""
+
+        formatted_msg = self._format_message(msg, "error", **kwargs)
+        self._logger.exception(formatted_msg)
+
 
 def get_logger(name: str) -> RichStructuredLogger:
     """Get a logger instance with Rich-compatible structured logging methods.
