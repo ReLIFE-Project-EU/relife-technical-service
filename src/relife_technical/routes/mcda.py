@@ -1,18 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from relife_financial.auth.dependencies import OptionalAuthenticatedUserDep
-from relife_service_template.config.logging import get_logger
-from relife_service_template.models.mcda import (
+from fastapi import APIRouter, HTTPException, status
+from relife_technical.auth.dependencies import OptionalAuthenticatedUserDep
+from relife_technical.config.logging import get_logger
+from relife_technical.models.mcda import (
     McdaTopsisRequest,
     McdaTopsisResponse,
     RankedTechnology,
 )
-from relife_service_template.services.mcda_topsis import topsis_rank_technologies
-from relife_financial.config.settings import SettingsDep
+from relife_technical.services.mcda_topsis import topsis_rank_technologies
 
 router = APIRouter(tags=["mcda"], prefix="/mcda")
 logger = get_logger(__name__)
 
-@router.post("/mcda/topsis", response_model=McdaTopsisResponse)
+@router.post("/topsis", response_model=McdaTopsisResponse)
 async def run_topsis(
     payload: McdaTopsisRequest,
     current_user: OptionalAuthenticatedUserDep,
@@ -22,7 +21,7 @@ async def run_topsis(
 
         logger.info(
             "Running TOPSIS ranking",
-            user_id=current_user.user_id,
+            user_id=current_user.user_id if current_user else None,
             profile=payload.profile,
             n_technologies=len(technologies),
         )
