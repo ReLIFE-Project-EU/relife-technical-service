@@ -10,7 +10,7 @@ from relife_technical.auth.keycloak import (
     validate_keycloak_jwt,
 )
 from relife_technical.config.logging import get_logger
-from relife_technical.config.settings import SettingsDep
+from relife_technical.config.settings import SettingsDep, get_settings
 from relife_technical.models.auth import (
     AuthenticatedUser,
     AuthenticationMethod,
@@ -180,19 +180,22 @@ Use this dependency when both user authentication and role-based access control 
 
 
 async def get_optional_authenticated_user(
-    settings: SettingsDep,
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security_optional),
 ) -> Optional[AuthenticatedUser]:
     """Optionally authenticates user if a token is provided.
 
     Returns None if no token is provided, allowing unauthenticated access.
     If a token is provided but invalid, raises HTTPException 401.
+
+    Settings are resolved lazily — only when credentials are present — so
+    anonymous calls succeed even if auth env vars are not configured.
     """
 
     if credentials is None:
         return None
 
-    # Token was provided - authenticate and raise error if invalid
+    # Token was provided: resolve settings only now and authenticate.
+    settings = get_settings()
     return await _get_authenticated_user(
         settings=settings, credentials=credentials, fetch_roles=False
     )
