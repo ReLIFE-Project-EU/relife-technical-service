@@ -2,6 +2,15 @@ import math
 from typing import Any, Dict, List, Tuple
 
 
+_PILLAR_WEIGHTS_BY_RANK = {
+    1: 0.45,
+    2: 0.30,
+    3: 0.15,
+    4: 0.08,
+    5: 0.02,
+}
+
+
 def topsis_rank_technologies(
     technologies: List[Dict[str, Any]],
     mins_maxes: Dict[str, Tuple[float, float]],
@@ -28,9 +37,8 @@ def topsis_rank_technologies(
         score = (mx - v) / (mx - mn) * 100.0
         return max(0.0, min(100.0, score))
 
-    def pillar_weight(pillar_score: int, no_kpis_in_pillar: int) -> float:
-        score_total = 15
-        return (pillar_score / score_total) * (1.0 / no_kpis_in_pillar)
+    def pillar_weight(pillar_rank: int, no_kpis_in_pillar: int) -> float:
+        return _PILLAR_WEIGHTS_BY_RANK[pillar_rank] / no_kpis_in_pillar
 
     # Calcs
     def calculate_ee(
@@ -47,15 +55,15 @@ def topsis_rank_technologies(
         cooling_n = normalize_low(cooling_system_kpi, cooling_system_min, cooling_system_max)
 
         if profile_ == "Environment-Oriented":
-            p_score = 3
+            pillar_rank = 3
         elif profile_ == "Comfort-Oriented":
-            p_score = 2
+            pillar_rank = 2
         elif profile_ == "Financially-Oriented":
-            p_score = 2
+            pillar_rank = 2
         else:
             raise ValueError("Invalid profile")
 
-        w = pillar_weight(p_score, no_kpis_in_pillar=4)
+        w = pillar_weight(pillar_rank, no_kpis_in_pillar=4)
         return w, envelope_n, window_n, heating_n, cooling_n
 
     def calculate_fv(
@@ -76,15 +84,15 @@ def topsis_rank_technologies(
         arv_n = normalize_high(arv_kpi, arv_min, arv_max)
 
         if profile_ == "Environment-Oriented":
-            p_score = 5
+            pillar_rank = 5
         elif profile_ == "Comfort-Oriented":
-            p_score = 3
+            pillar_rank = 3
         elif profile_ == "Financially-Oriented":
-            p_score = 1
+            pillar_rank = 1
         else:
             raise ValueError("Invalid profile")
 
-        w = pillar_weight(p_score, no_kpis_in_pillar=6)
+        w = pillar_weight(pillar_rank, no_kpis_in_pillar=6)
         return w, ii_n, aoc_n, irr_n, npv_n, pp_n, arv_n
 
     def calculate_rei(
@@ -99,15 +107,15 @@ def topsis_rank_technologies(
         net_n = normalize_high(net_export_kpi, net_export_min, net_export_max)
 
         if profile_ == "Environment-Oriented":
-            p_score = 2
+            pillar_rank = 2
         elif profile_ == "Comfort-Oriented":
-            p_score = 5
+            pillar_rank = 5
         elif profile_ == "Financially-Oriented":
-            p_score = 3
+            pillar_rank = 3
         else:
             raise ValueError("Invalid profile")
 
-        w = pillar_weight(p_score, no_kpis_in_pillar=3)
+        w = pillar_weight(pillar_rank, no_kpis_in_pillar=3)
         return w, st_n, onsite_n, net_n
 
     def calculate_sei(
@@ -120,15 +128,15 @@ def topsis_rank_technologies(
         gwp_n = normalize_low(gwp_kpi, gwp_min, gwp_max)
 
         if profile_ == "Environment-Oriented":
-            p_score = 1
+            pillar_rank = 1
         elif profile_ == "Comfort-Oriented":
-            p_score = 4
+            pillar_rank = 4
         elif profile_ == "Financially-Oriented":
-            p_score = 5
+            pillar_rank = 5
         else:
             raise ValueError("Invalid profile")
 
-        w = pillar_weight(p_score, no_kpis_in_pillar=2)
+        w = pillar_weight(pillar_rank, no_kpis_in_pillar=2)
         return w, ec_n, gwp_n
 
     def calculate_uc(
@@ -141,15 +149,15 @@ def topsis_rank_technologies(
         rh_n = normalize_high(humidity_kpi, humidity_min, humidity_max)
 
         if profile_ == "Environment-Oriented":
-            p_score = 4
+            pillar_rank = 4
         elif profile_ == "Comfort-Oriented":
-            p_score = 1
+            pillar_rank = 1
         elif profile_ == "Financially-Oriented":
-            p_score = 4
+            pillar_rank = 4
         else:
             raise ValueError("Invalid profile")
 
-        w = pillar_weight(p_score, no_kpis_in_pillar=2)
+        w = pillar_weight(pillar_rank, no_kpis_in_pillar=2)
         return w, t_n, rh_n
 
     required_keys = [
