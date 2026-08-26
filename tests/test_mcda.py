@@ -1,6 +1,11 @@
+import pytest
 from fastapi.testclient import TestClient
 
 from relife_technical.app import app
+from relife_technical.services.mcda_topsis import (
+    _PILLAR_WEIGHTS_BY_RANK,
+    topsis_rank_technologies,
+)
 
 client = TestClient(app)
 
@@ -59,3 +64,49 @@ def test_mcda_topsis_returns_ranking():
     assert len(data["ranking"]) == 1
     assert data["ranking"][0]["name"] == "TechA"
     assert "closeness" in data["ranking"][0]
+
+
+def test_mcda_pillar_weights_follow_m21_methodology():
+    weights = [_PILLAR_WEIGHTS_BY_RANK[rank] for rank in range(1, 6)]
+
+    assert weights == [0.45, 0.30, 0.15, 0.08, 0.02]
+    assert weights[0] > weights[-1]
+    assert sum(weights) == pytest.approx(1.0)
+
+
+def test_mcda_profile_can_change_the_top_ranked_technology():
+    sustainability_focused = {
+        **_MINIMAL_TECHNOLOGY,
+        "name": "LowCarbon",
+        "embodied_carbon_kpi": 0.0,
+        "gwp_kpi": 0.0,
+        "ii_kpi": 100.0,
+        "aoc_kpi": 100.0,
+        "irr_kpi": 0.0,
+        "npv_kpi": 0.0,
+        "pp_kpi": 100.0,
+        "arv_kpi": 0.0,
+    }
+    financially_focused = {
+        **_MINIMAL_TECHNOLOGY,
+        "name": "StrongFinancials",
+        "embodied_carbon_kpi": 100.0,
+        "gwp_kpi": 100.0,
+        "ii_kpi": 0.0,
+        "aoc_kpi": 0.0,
+        "irr_kpi": 100.0,
+        "npv_kpi": 100.0,
+        "pp_kpi": 0.0,
+        "arv_kpi": 100.0,
+    }
+    technologies = [sustainability_focused, financially_focused]
+
+    environmental_ranking = topsis_rank_technologies(
+        technologies, _MINS_MAXES, "Environment-Oriented"
+    )
+    financial_ranking = topsis_rank_technologies(
+        technologies, _MINS_MAXES, "Financially-Oriented"
+    )
+
+    assert environmental_ranking[0]["name"] == "LowCarbon"
+    assert financial_ranking[0]["name"] == "StrongFinancials"
