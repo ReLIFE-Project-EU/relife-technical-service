@@ -3,7 +3,7 @@ from importlib.metadata import version
 from fastapi import FastAPI
 
 from relife_technical.config.logging import configure_logging
-from relife_technical.routes import auth, examples, health, mcda
+from relife_technical.routes import auth, health, mcda
 
 # Dynamically determine the package name
 package_name = __name__.split(".")[0]
@@ -26,5 +26,4 @@ app = FastAPI(
 
 app.include_router(health.router)
 app.include_router(auth.router)
-app.include_router(examples.router)
 app.include_router(mcda.router)
