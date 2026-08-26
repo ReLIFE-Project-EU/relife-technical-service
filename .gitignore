@@ -209,3 +209,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Accidental nested clone of this repository.
+# A directory of this name has been committed as a bare gitlink (mode 160000)
+# twice - bc40c9a and 8b73bb3 - by contributors holding a nested clone of this
+# repo in their working tree. It was never a real submodule: no .gitmodules has
+# ever existed here. Ignore the path so it cannot be re-committed.
+relife-technical-service/
