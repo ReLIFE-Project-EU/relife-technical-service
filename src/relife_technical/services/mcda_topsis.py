@@ -17,9 +17,15 @@ def topsis_rank_technologies(
     profile: str,
 ) -> List[Dict[str, Any]]:
 
-    valid_profiles = {"Environment-Oriented", "Comfort-Oriented", "Financially-Oriented"}
+    valid_profiles = {
+        "Environment-Oriented",
+        "Health-Oriented",
+        "Financially-Oriented",
+    }
     if profile not in valid_profiles:
-        raise ValueError(f"Invalid profile '{profile}'. Must be one of {sorted(valid_profiles)}.")
+        raise ValueError(
+            f"Invalid profile '{profile}'. Must be one of {sorted(valid_profiles)}."
+        )
 
     def mm(key: str) -> Tuple[float, float]:
         if key not in mins_maxes:
@@ -56,7 +62,7 @@ def topsis_rank_technologies(
 
         if profile_ == "Environment-Oriented":
             pillar_rank = 3
-        elif profile_ == "Comfort-Oriented":
+        elif profile_ == "Health-Oriented":
             pillar_rank = 2
         elif profile_ == "Financially-Oriented":
             pillar_rank = 2
@@ -85,7 +91,7 @@ def topsis_rank_technologies(
 
         if profile_ == "Environment-Oriented":
             pillar_rank = 5
-        elif profile_ == "Comfort-Oriented":
+        elif profile_ == "Health-Oriented":
             pillar_rank = 3
         elif profile_ == "Financially-Oriented":
             pillar_rank = 1
@@ -108,7 +114,7 @@ def topsis_rank_technologies(
 
         if profile_ == "Environment-Oriented":
             pillar_rank = 2
-        elif profile_ == "Comfort-Oriented":
+        elif profile_ == "Health-Oriented":
             pillar_rank = 5
         elif profile_ == "Financially-Oriented":
             pillar_rank = 3
@@ -129,7 +135,7 @@ def topsis_rank_technologies(
 
         if profile_ == "Environment-Oriented":
             pillar_rank = 1
-        elif profile_ == "Comfort-Oriented":
+        elif profile_ == "Health-Oriented":
             pillar_rank = 4
         elif profile_ == "Financially-Oriented":
             pillar_rank = 5
@@ -139,26 +145,26 @@ def topsis_rank_technologies(
         w = pillar_weight(pillar_rank, no_kpis_in_pillar=2)
         return w, ec_n, gwp_n
 
-    def calculate_uc(
-        air_temp_kpi: float, air_temp_min: float, air_temp_max: float,
-        humidity_kpi: float, humidity_min: float, humidity_max: float,
-        profile_: str
-    ) -> Tuple[float, float, float]:
+    def calculate_health(
+        daly_kpi: float,
+        daly_min: float,
+        daly_max: float,
+        profile_: str,
+    ) -> Tuple[float, float]:
 
-        t_n = normalize_high(air_temp_kpi, air_temp_min, air_temp_max)
-        rh_n = normalize_high(humidity_kpi, humidity_min, humidity_max)
+        daly_n = normalize_high(daly_kpi, daly_min, daly_max)
 
         if profile_ == "Environment-Oriented":
             pillar_rank = 4
-        elif profile_ == "Comfort-Oriented":
+        elif profile_ == "Health-Oriented":
             pillar_rank = 1
         elif profile_ == "Financially-Oriented":
             pillar_rank = 4
         else:
             raise ValueError("Invalid profile")
 
-        w = pillar_weight(pillar_rank, no_kpis_in_pillar=2)
-        return w, t_n, rh_n
+        w = pillar_weight(pillar_rank, no_kpis_in_pillar=1)
+        return w, daly_n
 
     required_keys = [
         "name",
@@ -170,8 +176,8 @@ def topsis_rank_technologies(
         "st_coverage_kpi", "onsite_res_kpi", "net_energy_export_kpi",
         # SEI
         "embodied_carbon_kpi", "gwp_kpi",
-        # UC
-        "thermal_comfort_air_temp_kpi", "thermal_comfort_humidity_kpi",
+        # HE
+        "daly_kpi",
     ]
 
     weighted_by_tech: List[Dict[str, Any]] = []
@@ -216,10 +222,9 @@ def topsis_rank_technologies(
             profile
         )
 
-        # UC
-        uc_w, t_n, rh_n = calculate_uc(
-            tech["thermal_comfort_air_temp_kpi"], *mm("thermal_comfort_air_temp_kpi"),
-            tech["thermal_comfort_humidity_kpi"], *mm("thermal_comfort_humidity_kpi"),
+        # HE
+        health_w, daly_n = calculate_health(
+            tech["daly_kpi"], *mm("daly_kpi"),
             profile
         )
 
@@ -247,9 +252,8 @@ def topsis_rank_technologies(
             "embodied_carbon": sei_w * ec_n,
             "gwp": sei_w * gwp_n,
 
-            # UC (2)
-            "thermal_comfort_air_temp": uc_w * t_n,
-            "thermal_comfort_humidity": uc_w * rh_n,
+            # HE (1)
+            "daly": health_w * daly_n,
         }
 
         weighted_by_tech.append({"name": tech["name"], "weighted_kpis": weighted_kpis})

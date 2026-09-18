@@ -1,6 +1,8 @@
-#Define pydantic models for MCDA calculations
-from typing import Dict, List, Tuple, Optional
+# Define Pydantic models for MCDA calculations
+from typing import Dict, List, Tuple
+
 from pydantic import BaseModel, Field
+
 
 class TechnologyKpis(BaseModel):
     name: str = Field(..., description="Technology name/identifier")
@@ -28,9 +30,14 @@ class TechnologyKpis(BaseModel):
     embodied_carbon_kpi: float
     gwp_kpi: float
 
-    # UC
-    thermal_comfort_air_temp_kpi: float
-    thermal_comfort_humidity_kpi: float
+    # HE
+    daly_kpi: float = Field(
+        ...,
+        description=(
+            "Total DALYs avoided versus the baseline; higher values indicate "
+            "a greater health co-benefit"
+        ),
+    )
 
 
 class McdaTopsisRequest(BaseModel):
@@ -40,7 +47,7 @@ class McdaTopsisRequest(BaseModel):
         examples=["Environment-Oriented"],
     )
 
-    technologies: List[TechnologyKpis] = Field(..., min_items=1)
+    technologies: List[TechnologyKpis] = Field(..., min_length=1)
 
     mins_maxes: Dict[str, Tuple[float, float]] = Field(
         ...,
