@@ -1,66 +1,32 @@
 # ReLIFE Technical Service
 
-## Introduction
+This service ranks building renovation options using Multi-Criteria Decision Analysis (MCDA). Partners supply indicators for each option and choose a preference profile to compare energy, financial, environmental, renewable-energy, and health outcomes.
 
-The ReLIFE Technical Service provides tools for estimating renovation costs, forecasting post-renovation property value, and evaluating long-term energy and economic savings.
+## How ranking works
 
-## Technology Stack
+`POST /mcda/topsis` applies TOPSIS, a method that scores options by their distance from ideal and least-desirable outcomes, across five pillars:
 
-- **Python 3+**: Core programming language
-- **FastAPI**: Web framework for building APIs with automatic OpenAPI documentation
-- **Uvicorn**: ASGI server for running the FastAPI application
-- **Pydantic**: Data validation and settings management using Python type annotations
-- **Supabase**: Backend-as-a-Service providing database operations and storage
-- **Keycloak**: Identity and access management for authentication and authorization
-- **HTTPX**: HTTP client library for making requests
-- **Rich**: Terminal output formatting and styling
-- **Pytest**: Testing framework with async support
+- Energy efficiency: building envelope, windows, heating, and cooling.
+- Financial viability: investment, operating costs, returns, payback, and property value.
+- Renewable energy integration: solar coverage, on-site generation, and energy exports.
+- Environmental impact: embodied carbon and global warming potential.
+- Health: avoided disability-adjusted life years (DALYs), measuring reductions in healthy life lost.
 
-## Configuration
+The caller supplies each option's indicators, their minimum/maximum normalization ranges, and an `Environment-Oriented`, `Health-Oriented`, or `Financially-Oriented` profile. Profiles assign different priorities to the pillars. The response contains the ordered options and their scores; higher closeness scores rank first.
 
-All configuration is driven by environment variables:
+Indicators must already be calculated before calling this service. See the [input/output models](src/relife_technical/models/mcda.py) and [ranking implementation](src/relife_technical/services/mcda_topsis.py).
 
-| Category     | Variable                 | Description                                       | Default Value                                        |
-| ------------ | ------------------------ | ------------------------------------------------- | ---------------------------------------------------- |
-| **Server**   | `API_HOST`               | Host address for the API server                   | `0.0.0.0`                                            |
-|              | `API_PORT`               | Port for the API server                           | `9090`                                               |
-| **Supabase** | `SUPABASE_URL`           | URL of the Supabase instance                      | -                                                    |
-|              | `SUPABASE_KEY`           | Service role key with admin privileges            | -                                                    |
-| **Keycloak** | `KEYCLOAK_CLIENT_ID`     | Client ID for the application in Keycloak         | -                                                    |
-|              | `KEYCLOAK_CLIENT_SECRET` | Client secret for the application in Keycloak     | -                                                    |
-|              | `KEYCLOAK_REALM_URL`     | Base URL of the Keycloak realm for authentication | `https://relife-identity.test.ctic.es/realms/relife` |
-| **Roles**    | `ADMIN_ROLE_NAME`        | Name of the admin role used for permission checks | `relife_admin`                                       |
-| **Storage**  | `BUCKET_NAME`            | Name of the default storage bucket in Supabase    | `default_relife_bucket`                              |
+## Run locally
 
-> [!WARNING]
->
-> - The `SUPABASE_KEY` uses the service role key that bypasses Row Level Security (RLS) policies. This should **never** be exposed to clients.
-> - `KEYCLOAK_CLIENT_SECRET` is sensitive and should be properly secured in production environments.
-
-## Authentication Integration Validation
-
-This template includes a validation script to test authentication integration with remote Supabase and Keycloak instances. This tool helps you verify your configuration and troubleshoot authentication issues.
-
-### Usage
+Requires Python 3.11 and `uv`. From the repository root:
 
 ```bash
-uv run validate-supabase --email <your-email> --auth-method <method>
+uv sync --frozen
+uv run --frozen run-service
 ```
 
-### Authentication Methods
+Open [API documentation](http://localhost:9090/docs); `GET /health` checks availability. `API_HOST` and `API_PORT` default to `0.0.0.0` and `9090`.
 
-| Method            | Description                                                    | Use Case                                    |
-| ----------------- | -------------------------------------------------------------- | ------------------------------------------- |
-| `supabase`        | Email/password authentication via Supabase                     | Testing direct Supabase user authentication |
-| `keycloak-user`   | Username/password via Keycloak (Resource Owner Password Grant) | Testing Keycloak user credentials           |
-| `keycloak-client` | Client credentials via Keycloak (Client Credentials Grant)     | Testing service-to-service authentication   |
+Anonymous ranking needs no authentication settings. Authenticated requests require Supabase/Keycloak credentials; see [configuration](src/relife_technical/config/settings.py). Keep credentials server-side.
 
-### Validation Process
-
-The script performs an end-to-end authentication validation:
-
-1. **Authentication**: Authenticate using the specified method and credentials
-2. **Server Startup**: Launches a temporary API server instance
-3. **Endpoint Verification**: Tests the `/whoami` endpoint with the obtained token
-4. **User Information**: Displays authenticated user details and associated roles
-5. **Cleanup**: Automatically shuts down the temporary server
+Run tests with `uv run --frozen pytest`. Licensed under [EUPL-1.2](LICENSE).
